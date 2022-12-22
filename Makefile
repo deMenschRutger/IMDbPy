@@ -1,3 +1,9 @@
+test:
+	python -m pytest
+
+coverage:
+	coverage html
+
 check:
 	isort . --diff
 	black . --diff
