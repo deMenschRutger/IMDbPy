@@ -12,3 +12,6 @@ check:
 lint:
 	isort .
 	black .
+
+types:
+	mypy .

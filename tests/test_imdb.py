@@ -1,7 +1,6 @@
 from app import imdb
 
 
-# TODO Add coverage.
 def test_retrieve_ratings_from_multiple_pages(ratings_request):
     result = imdb.retrieve_ratings("ur0000001")
 

@@ -1,9 +1,9 @@
 import re
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import Optional, cast
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 
 @dataclass
@@ -12,16 +12,17 @@ class Movie:
     title: str
     rating: int
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if not isinstance(other, Movie):
             return False
         return self.id == other.id
 
 
-def _retrieve_single_ratings_page(url: str) -> Tuple[List[Movie], Optional[str]]:
+def _retrieve_single_ratings_page(url: str) -> tuple[list[Movie], Optional[str]]:
     response = requests.get(f"https://www.imdb.com{url}")
     soup = BeautifulSoup(response.text, "html.parser")
     container = soup.find("div", id="ratings-container")
+    assert isinstance(container, Tag)
 
     # Find all movies on the page.
     nodes = container.find_all("div", attrs={"class": "lister-item mode-detail"})
@@ -48,16 +49,17 @@ def _retrieve_single_ratings_page(url: str) -> Tuple[List[Movie], Optional[str]]
     next_page_el = container.find("a", attrs={"class": "next-page"})
     if not next_page_el:
         return movies, None
+    assert isinstance(next_page_el, Tag)
 
     href = next_page_el.get("href")
     if not href or href == "#":
         return movies, None
 
-    return movies, next_page_el["href"]
+    return movies, cast(str, next_page_el["href"])
 
 
-def retrieve_ratings(user_id: str) -> List[Movie]:
-    next_page_url = f"/user/{user_id}/ratings"
+def retrieve_ratings(user_id: str) -> list[Movie]:
+    next_page_url = cast(Optional[str], f"/user/{user_id}/ratings")
     movies = []
     while next_page_url:
         page_movies, next_page_url = _retrieve_single_ratings_page(next_page_url)
