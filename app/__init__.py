@@ -1,20 +1,30 @@
-from pprint import pprint
+import json
+import logging
+from cmath import log
 
 import click
 from flask import Flask
 from flask.cli import AppGroup
+from redis import Redis
 
 from app.imdb import retrieve_ratings
 
+logging.basicConfig(level=logging.DEBUG)
+
+redis = Redis()
 app = Flask(__name__)
-compare_cli = AppGroup("compare")
+lists_cli = AppGroup("lists")
 
 
-@compare_cli.command("lists")
+@lists_cli.command("sync")
 @click.argument("user-id")
-def compare_lists(user_id: str):
-    movies = retrieve_ratings(user_id)
-    pprint(movies)
+def sync(user_id: str):
+    movies = set(retrieve_ratings(user_id))
+    key = f"user:{user_id}:ratings"
+    redis.delete(key)
+    for movie in movies:
+        redis.sadd(key, json.dumps(movie.__dict__))
+    print(f"Synchronized {len(movies)} movies.")
 
 
 @app.route("/")
@@ -22,4 +32,4 @@ def hello_world():
     return "<p>Hello, World!</p>"
 
 
-app.cli.add_command(compare_cli)
+app.cli.add_command(lists_cli)

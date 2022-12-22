@@ -1,9 +1,12 @@
+import logging
 import re
 from dataclasses import dataclass
 from typing import Optional, cast
 
 import requests
 from bs4 import BeautifulSoup, Tag
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -16,6 +19,9 @@ class Movie:
         if not isinstance(other, Movie):
             return False
         return self.id == other.id
+
+    def __hash__(self) -> int:
+        return hash(self.id)
 
 
 def _retrieve_single_ratings_page(url: str) -> tuple[list[Movie], Optional[str]]:
@@ -61,7 +67,10 @@ def _retrieve_single_ratings_page(url: str) -> tuple[list[Movie], Optional[str]]
 def retrieve_ratings(user_id: str) -> list[Movie]:
     next_page_url = cast(Optional[str], f"/user/{user_id}/ratings")
     movies = []
+    page_count = 1
     while next_page_url:
+        logger.debug(f"Retrieving ratings from page {page_count}.")
         page_movies, next_page_url = _retrieve_single_ratings_page(next_page_url)
         movies.extend(page_movies)
+        page_count += 1
     return movies
