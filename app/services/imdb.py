@@ -1,6 +1,7 @@
 import logging
 import re
 from dataclasses import dataclass
+from operator import attrgetter
 from typing import Optional, cast
 
 import requests
@@ -64,7 +65,7 @@ def _retrieve_single_ratings_page(url: str) -> tuple[list[Movie], Optional[str]]
     return movies, cast(str, next_page_el["href"])
 
 
-def retrieve_ratings(user_id: str) -> list[Movie]:
+def retrieve_ratings(user_id: str, limit: Optional[int] = None) -> list[Movie]:
     next_page_url = cast(Optional[str], f"/user/{user_id}/ratings")
     movies = []
     page_count = 1
@@ -73,4 +74,23 @@ def retrieve_ratings(user_id: str) -> list[Movie]:
         page_movies, next_page_url = _retrieve_single_ratings_page(next_page_url)
         movies.extend(page_movies)
         page_count += 1
+        if limit and len(movies) >= limit:
+            return movies[0:limit]
     return movies
+
+
+def compare_ratings(
+    from_movies: set[Movie], to_movies: set[Movie]
+) -> tuple[list[Movie], list[Movie], list[Movie]]:
+    both = list(from_movies.intersection(to_movies))
+    only_from = sorted(
+        from_movies.difference(to_movies),
+        key=attrgetter("rating", "title"),
+        reverse=True,
+    )
+    only_to = sorted(
+        to_movies.difference(from_movies),
+        key=attrgetter("rating", "title"),
+        reverse=True,
+    )
+    return both, only_from, only_to

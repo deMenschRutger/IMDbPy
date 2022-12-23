@@ -11,12 +11,27 @@ def movie_one():
 
 
 @pytest.fixture(scope="session")
-def all_movies(movie_one):
+def movie_two():
+    return Movie(id="tt0110322", title="Legends of the Fall", rating=7)
+
+
+@pytest.fixture(scope="session")
+def movie_three():
+    return Movie(id="tt11003218", title="Pig", rating=8)
+
+
+@pytest.fixture(scope="session")
+def movie_four():
+    return Movie(id="tt0185183", title="Battlefield Earth", rating=2)
+
+
+@pytest.fixture(scope="session")
+def all_movies(movie_one, movie_two, movie_three, movie_four):
     return [
         movie_one,
-        Movie(id="tt0110322", title="Legends of the Fall", rating=7),
-        Movie(id="tt11003218", title="Pig", rating=8),
-        Movie(id="tt0185183", title="Battlefield Earth", rating=2),
+        movie_two,
+        movie_three,
+        movie_four,
     ]
 
 

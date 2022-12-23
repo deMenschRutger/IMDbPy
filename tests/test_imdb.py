@@ -1,4 +1,6 @@
-from app.services.imdb import Movie, retrieve_ratings
+import pytest
+
+from app.services.imdb import Movie, compare_ratings, retrieve_ratings
 
 
 def test_movies_are_equal():
@@ -50,3 +52,21 @@ def test_retrieve_ratings_from_multiple_pages(
 
     assert len(result) == 4
     assert result == all_movies
+
+
+@pytest.mark.parametrize("limit", [1, 2, 3, 4])
+def test_retrieve_ratings_with_limit(limit, ratings_request_multiple_pages, all_movies):
+    result = retrieve_ratings("ur0000001", limit)
+
+    assert len(result) == limit
+
+
+def test_compare_movie_lists(movie_one, movie_two, movie_three, movie_four):
+    from_list = {movie_one, movie_two, movie_four}
+    to_list = {movie_three, movie_four}
+
+    both, from_only, to_only = compare_ratings(from_list, to_list)
+
+    assert both == [movie_four]
+    assert from_only == [movie_one, movie_two]
+    assert to_only == [movie_three]
