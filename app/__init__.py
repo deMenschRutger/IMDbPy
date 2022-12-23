@@ -1,6 +1,5 @@
 import json
 import logging
-from cmath import log
 
 import click
 from flask import Flask

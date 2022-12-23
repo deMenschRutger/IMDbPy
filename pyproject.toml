@@ -4,5 +4,8 @@ profile = "black"
 [tool.pytest.ini_options]
 pythonpath = ["."]
 
+[tool.coverage.run]
+branch = true
+
 [tool.coverage.report]
 include = ["app/*"]

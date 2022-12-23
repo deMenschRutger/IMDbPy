@@ -1,7 +1,12 @@
 test:
 	python -m pytest
 
+report:
+	coverage run -m pytest
+	coverage report
+
 coverage:
+	coverage run -m pytest
 	coverage html
 
 check:
@@ -12,6 +17,4 @@ check:
 lint:
 	isort .
 	black .
-
-types:
 	mypy .

@@ -2,6 +2,35 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from app.imdb import Movie
+
+
+@pytest.fixture(scope="session")
+def movie_one():
+    return Movie(id="tt6710474", title="Everything Everywhere All at Once", rating=8)
+
+
+@pytest.fixture(scope="session")
+def all_movies(movie_one):
+    return [
+        movie_one,
+        Movie(id="tt0110322", title="Legends of the Fall", rating=7),
+        Movie(id="tt11003218", title="Pig", rating=8),
+        Movie(id="tt0185183", title="Battlefield Earth", rating=2),
+    ]
+
+
+@pytest.fixture(scope="session")
+def ratings_without_footer():
+    with open("tests/fixtures/ratings_without_footer.html") as f:
+        return MagicMock(text=f.read())
+
+
+@pytest.fixture(scope="session")
+def ratings_without_next_page():
+    with open("tests/fixtures/ratings_without_next_page.html") as f:
+        return MagicMock(text=f.read())
+
 
 @pytest.fixture(scope="session")
 def ratings_page_one():
@@ -16,7 +45,21 @@ def ratings_page_two():
 
 
 @pytest.fixture
-def ratings_request(ratings_page_one, ratings_page_two):
+def ratings_request_without_footer(ratings_without_footer):
+    with patch("app.imdb.requests") as requests:
+        requests.get.side_effect = [ratings_without_footer]
+        yield requests
+
+
+@pytest.fixture
+def ratings_request_without_next_page(ratings_without_next_page):
+    with patch("app.imdb.requests") as requests:
+        requests.get.side_effect = [ratings_without_next_page]
+        yield requests
+
+
+@pytest.fixture
+def ratings_request_multiple_pages(ratings_page_one, ratings_page_two):
     with patch("app.imdb.requests") as requests:
         requests.get.side_effect = [ratings_page_one, ratings_page_two]
         yield requests
