@@ -13,8 +13,8 @@ check:
 	isort . --diff
 	black . --diff
 	flake8
+	mypy .
 
 lint:
 	isort .
 	black .
-	mypy .

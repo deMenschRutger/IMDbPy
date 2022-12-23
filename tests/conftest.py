@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from app.imdb import Movie
+from app.services.imdb import Movie
 
 
 @pytest.fixture(scope="session")
@@ -46,20 +46,20 @@ def ratings_page_two():
 
 @pytest.fixture
 def ratings_request_without_footer(ratings_without_footer):
-    with patch("app.imdb.requests") as requests:
+    with patch("app.services.imdb.requests") as requests:
         requests.get.side_effect = [ratings_without_footer]
         yield requests
 
 
 @pytest.fixture
 def ratings_request_without_next_page(ratings_without_next_page):
-    with patch("app.imdb.requests") as requests:
+    with patch("app.services.imdb.requests") as requests:
         requests.get.side_effect = [ratings_without_next_page]
         yield requests
 
 
 @pytest.fixture
 def ratings_request_multiple_pages(ratings_page_one, ratings_page_two):
-    with patch("app.imdb.requests") as requests:
+    with patch("app.services.imdb.requests") as requests:
         requests.get.side_effect = [ratings_page_one, ratings_page_two]
         yield requests

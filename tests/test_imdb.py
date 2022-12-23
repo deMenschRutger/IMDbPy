@@ -1,4 +1,4 @@
-from app.imdb import Movie, retrieve_ratings
+from app.services.imdb import Movie, retrieve_ratings
 
 
 def test_movies_are_equal():
