@@ -1,3 +1,4 @@
+from copy import deepcopy
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -33,6 +34,16 @@ def all_movies(movie_one, movie_two, movie_three, movie_four):
         movie_three,
         movie_four,
     ]
+
+
+@pytest.fixture
+def movie_with_rating():
+    def copy_movie(movie, rating):
+        movie = deepcopy(movie)
+        movie.rating = rating
+        return movie
+
+    return copy_movie
 
 
 @pytest.fixture(scope="session")

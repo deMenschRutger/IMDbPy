@@ -81,8 +81,23 @@ def retrieve_ratings(user_id: str, limit: Optional[int] = None) -> list[Movie]:
 
 def compare_ratings(
     from_movies: set[Movie], to_movies: set[Movie]
-) -> tuple[list[Movie], list[Movie], list[Movie]]:
-    both = list(from_movies.intersection(to_movies))
+) -> tuple[dict, list[Movie], list[Movie]]:
+    from_by_ratings = {m.id: m.rating for m in from_movies}
+    to_by_ratings = {m.id: m.rating for m in to_movies}
+    both: dict = dict()
+
+    for movie in from_movies.intersection(to_movies):
+        from_rating = from_by_ratings[movie.id]
+        to_rating = to_by_ratings[movie.id]
+        difference = from_rating - to_rating
+        if difference < 0:
+            difference = 0 - difference
+        both[movie.id] = {
+            "title": movie.title,
+            "from_rating": from_rating,
+            "to_rating": to_rating,
+            "difference": difference,
+        }
 
     def sort_ratings(movies: Iterable[Movie]) -> list[Movie]:
         movies = sorted(movies, key=attrgetter("title"))
@@ -90,4 +105,5 @@ def compare_ratings(
 
     only_from = sort_ratings(from_movies.difference(to_movies))
     only_to = sort_ratings(to_movies.difference(from_movies))
+
     return both, only_from, only_to
