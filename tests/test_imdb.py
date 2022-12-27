@@ -61,7 +61,7 @@ def test_retrieve_ratings_with_limit(limit, ratings_request_multiple_pages, all_
     assert len(result) == limit
 
 
-def test_compare_movie_lists(movie_one, movie_two, movie_three, movie_four):
+def test_compare_different_movie_lists(movie_one, movie_two, movie_three, movie_four):
     from_list = {movie_one, movie_two, movie_four}
     to_list = {movie_three, movie_four}
 
@@ -70,3 +70,29 @@ def test_compare_movie_lists(movie_one, movie_two, movie_three, movie_four):
     assert both == [movie_four]
     assert from_only == [movie_one, movie_two]
     assert to_only == [movie_three]
+
+
+def test_compare_only_from_movie_lists(
+    all_movies, movie_one, movie_two, movie_three, movie_four
+):
+    from_list = set(all_movies)
+    to_list = set()
+
+    both, from_only, to_only = compare_ratings(from_list, to_list)
+
+    assert both == []
+    assert from_only == [movie_one, movie_three, movie_two, movie_four]
+    assert to_only == []
+
+
+def test_compare_only_to_movie_lists(
+    all_movies, movie_one, movie_two, movie_three, movie_four
+):
+    from_list = set()
+    to_list = set(all_movies)
+
+    both, from_only, to_only = compare_ratings(from_list, to_list)
+
+    assert both == []
+    assert from_only == []
+    assert to_only == [movie_one, movie_three, movie_two, movie_four]

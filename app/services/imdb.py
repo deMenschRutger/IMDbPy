@@ -2,7 +2,7 @@ import logging
 import re
 from dataclasses import dataclass
 from operator import attrgetter
-from typing import Optional, cast
+from typing import Iterable, Optional, cast
 
 import requests
 from bs4 import BeautifulSoup, Tag
@@ -83,14 +83,11 @@ def compare_ratings(
     from_movies: set[Movie], to_movies: set[Movie]
 ) -> tuple[list[Movie], list[Movie], list[Movie]]:
     both = list(from_movies.intersection(to_movies))
-    only_from = sorted(
-        from_movies.difference(to_movies),
-        key=attrgetter("rating", "title"),
-        reverse=True,
-    )
-    only_to = sorted(
-        to_movies.difference(from_movies),
-        key=attrgetter("rating", "title"),
-        reverse=True,
-    )
+
+    def sort_ratings(movies: Iterable[Movie]) -> list[Movie]:
+        movies = sorted(movies, key=attrgetter("title"))
+        return sorted(movies, key=attrgetter("rating"), reverse=True)
+
+    only_from = sort_ratings(from_movies.difference(to_movies))
+    only_to = sort_ratings(to_movies.difference(from_movies))
     return both, only_from, only_to
