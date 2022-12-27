@@ -1,5 +1,9 @@
+from typing import Optional
+
 import click
 from flask.cli import AppGroup
+from rich.console import Console
+from rich.table import Table
 
 from app.services import imdb, redis
 
@@ -20,20 +24,27 @@ def sync(user_id: str):
 @lists_cli.command("compare")
 @click.argument("from-id")
 @click.argument("to-id")
-def compare(from_id: str, to_id: str):
+@click.option("--from-name")
+@click.option("--to-name")
+def compare(from_id: str, to_id: str, from_name: Optional[str], to_name: Optional[str]):
     from_movies = redis.retrieve_ratings(from_id)
     to_movies = redis.retrieve_ratings(to_id)
     both, only_from, only_to = imdb.compare_ratings(from_movies, to_movies)
 
-    print(f"User '{from_id}' has rated {len(from_movies)} movies.")
-    print(f"User '{to_id}' has rated {len(to_movies)} movies.")
-    print(f"There are {len(both)} movies that both users have rated.")
-    print(
-        f"User '{from_id}' has rated {len(only_from)} movies that user '{to_id}' has not rated."  # noqa: E501
-    )
-    print(
-        f"User '{to_id}' has rated {len(only_to)} movies that user '{from_id}' has not rated."  # noqa: E501
-    )
+    from_name = from_name or from_id
+    to_name = to_name or to_id
+
+    table = Table()
+    table.add_column("Statistic", style="cyan")
+    table.add_column(from_name, style="green")
+    table.add_column(to_name, style="green")
+
+    table.add_row("Number of ratings", str(len(from_movies)), str(len(to_movies)))
+    table.add_row("Both rated", str(len(both)), str(len(both)))
+    table.add_row("Only rated", str(len(only_from)), str(len(only_to)))
+
+    console = Console()
+    console.print(table)
 
 
 app.cli.add_command(lists_cli)
