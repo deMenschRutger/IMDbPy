@@ -76,12 +76,14 @@ def test_compare_different_movie_lists(
 
     assert both == {
         movie_two.id: {
+            "id": movie_two.id,
             "title": movie_two.title,
             "from_rating": 8,
             "to_rating": 7,
             "difference": 1,
         },
         movie_four.id: {
+            "id": movie_four.id,
             "title": movie_four.title,
             "from_rating": 3,
             "to_rating": 5,

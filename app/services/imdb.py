@@ -95,6 +95,7 @@ def compare_ratings(
         if difference < 0:
             difference = 0 - difference
         both[movie.id] = {
+            "id": movie.id,
             "title": movie.title,
             "from_rating": from_rating,
             "to_rating": to_rating,

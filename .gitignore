@@ -18,7 +18,7 @@ lib/
 lib64/
 parts/
 sdist/
-var/
+var/*
 wheels/
 pip-wheel-metadata/
 share/python-wheels/
@@ -26,6 +26,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+!*/.gitkeep
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
