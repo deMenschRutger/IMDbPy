@@ -65,7 +65,7 @@ def _retrieve_single_ratings_page(url: str) -> tuple[list[Movie], Optional[str]]
     return movies, cast(str, next_page_el["href"])
 
 
-def retrieve_ratings(user_id: str, limit: Optional[int] = None) -> list[Movie]:
+def retrieve_ratings(user_id: str, limit: Optional[int] = None) -> set[Movie]:
     next_page_url = cast(Optional[str], f"/user/{user_id}/ratings")
     movies = []
     page_count = 1
@@ -75,21 +75,23 @@ def retrieve_ratings(user_id: str, limit: Optional[int] = None) -> list[Movie]:
         movies.extend(page_movies)
         page_count += 1
         if limit and len(movies) >= limit:
-            return movies[0:limit]
-    return movies
+            return set(movies[0:limit])
+    return set(movies)
 
 
 def compare_ratings(
     from_movies: set[Movie], to_movies: set[Movie]
-) -> tuple[dict, list[Movie], list[Movie]]:
+) -> tuple[dict[str, dict], list[Movie], list[Movie]]:
     from_by_ratings = {m.id: m.rating for m in from_movies}
     to_by_ratings = {m.id: m.rating for m in to_movies}
-    both: dict = dict()
+    both: dict[str, dict] = dict()
 
     for movie in from_movies.intersection(to_movies):
         from_rating = from_by_ratings[movie.id]
         to_rating = to_by_ratings[movie.id]
         difference = from_rating - to_rating
+        # It doesn't matter who had the higher rating, we're just interested in the
+        # difference between the two.
         if difference < 0:
             difference = 0 - difference
         both[movie.id] = {

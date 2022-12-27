@@ -33,7 +33,7 @@ def test_retrieve_ratings_from_single_page(ratings_request_without_footer, movie
     result = retrieve_ratings("ur0000001")
 
     assert len(result) == 1
-    assert result == [movie_one]
+    assert result == {movie_one}
 
 
 def test_retrieve_ratings_without_next_page(
@@ -42,7 +42,7 @@ def test_retrieve_ratings_without_next_page(
     result = retrieve_ratings("ur0000001")
 
     assert len(result) == 1
-    assert result == [movie_one]
+    assert result == {movie_one}
 
 
 def test_retrieve_ratings_from_multiple_pages(
@@ -55,7 +55,7 @@ def test_retrieve_ratings_from_multiple_pages(
 
 
 @pytest.mark.parametrize("limit", [1, 2, 3, 4])
-def test_retrieve_ratings_with_limit(limit, ratings_request_multiple_pages, all_movies):
+def test_retrieve_ratings_with_limit(limit, ratings_request_multiple_pages):
     result = retrieve_ratings("ur0000001", limit)
 
     assert len(result) == limit
@@ -95,7 +95,7 @@ def test_compare_different_movie_lists(
 def test_compare_only_from_movie_lists(
     all_movies, movie_one, movie_two, movie_three, movie_four
 ):
-    from_list = set(all_movies)
+    from_list = all_movies
     to_list = set()
 
     both, from_only, to_only = compare_ratings(from_list, to_list)
@@ -109,7 +109,7 @@ def test_compare_only_to_movie_lists(
     all_movies, movie_one, movie_two, movie_three, movie_four
 ):
     from_list = set()
-    to_list = set(all_movies)
+    to_list = all_movies
 
     both, from_only, to_only = compare_ratings(from_list, to_list)
 

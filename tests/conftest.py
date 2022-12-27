@@ -3,7 +3,21 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from app import app
 from app.services.imdb import Movie
+from app.services.redis import redis
+
+
+def pytest_sessionstart():
+    if not app.config["ENV"] == "testing":
+        pytest.exit(
+            "Please set the env variable 'ENV' to 'testing' when running the tests."
+        )
+    if redis.dbsize() > 0:
+        pytest.exit(
+            "An empty Redis database is required to run the tests, "
+            f"but database {app.config['REDIS_DB']} is not empty."
+        )
 
 
 @pytest.fixture(scope="session")
@@ -28,12 +42,12 @@ def movie_four():
 
 @pytest.fixture(scope="session")
 def all_movies(movie_one, movie_two, movie_three, movie_four):
-    return [
+    return {
         movie_one,
         movie_two,
         movie_three,
         movie_four,
-    ]
+    }
 
 
 @pytest.fixture
