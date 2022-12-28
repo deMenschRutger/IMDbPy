@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from operator import itemgetter
+from pathlib import Path
+from typing import Union
 
 from openpyxl import Workbook
 from rich.console import Console
@@ -57,7 +59,14 @@ class CliHandler(Handler):
         console.print(table)
 
 
+@dataclass
 class SheetHandler(Handler):
+    path: Union[Path, str]
+
+    def __post_init__(self):
+        if not isinstance(self.path, Path):
+            self.path = Path(self.path)
+
     def handle(self):
         wb = Workbook()
         both_sheet = wb.active
@@ -87,4 +96,4 @@ class SheetHandler(Handler):
             row = [movie.id, movie.title, movie.rating]
             to_sheet.append(row)
 
-        wb.save("var/sheet.xlsx")
+        wb.save(self.path)

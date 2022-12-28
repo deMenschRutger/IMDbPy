@@ -61,6 +61,29 @@ def movie_with_rating():
 
 
 @pytest.fixture(scope="session")
+def comparison_result(movie_one, movie_two, movie_three, movie_four):
+    both = {
+        movie_two.id: {
+            "id": movie_two.id,
+            "title": movie_two.title,
+            "from_rating": 8,
+            "to_rating": 7,
+            "difference": 1,
+        },
+        movie_four.id: {
+            "id": movie_four.id,
+            "title": movie_four.title,
+            "from_rating": 3,
+            "to_rating": 5,
+            "difference": 2,
+        },
+    }
+    only_from = [movie_one]
+    only_to = [movie_three]
+    return both, only_from, only_to
+
+
+@pytest.fixture(scope="session")
 def ratings_without_footer():
     with open("tests/fixtures/ratings_without_footer.html") as f:
         return MagicMock(text=f.read())

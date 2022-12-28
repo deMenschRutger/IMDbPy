@@ -76,7 +76,7 @@ def test_retrieve_ratings_with_limit(limit, ratings_request_multiple_pages):
 
 
 def test_compare_different_movie_lists(
-    movie_one, movie_two, movie_three, movie_four, movie_with_rating
+    movie_one, movie_two, movie_three, movie_four, movie_with_rating, comparison_result
 ):
     movie_two_from = movie_with_rating(movie_two, 8)
     movie_two_to = movie_with_rating(movie_two, 7)
@@ -86,26 +86,12 @@ def test_compare_different_movie_lists(
     from_list = {movie_one, movie_two_from, movie_four_from}
     to_list = {movie_two_to, movie_three, movie_four_to}
 
-    both, from_only, to_only = compare_ratings(from_list, to_list)
+    both, only_from, only_to = compare_ratings(from_list, to_list)
 
-    assert both == {
-        movie_two.id: {
-            "id": movie_two.id,
-            "title": movie_two.title,
-            "from_rating": 8,
-            "to_rating": 7,
-            "difference": 1,
-        },
-        movie_four.id: {
-            "id": movie_four.id,
-            "title": movie_four.title,
-            "from_rating": 3,
-            "to_rating": 5,
-            "difference": 2,
-        },
-    }
-    assert from_only == [movie_one]
-    assert to_only == [movie_three]
+    expected_both, expected_only_from, expected_only_to = comparison_result
+    assert both == expected_both
+    assert only_from == expected_only_from
+    assert only_to == expected_only_to
 
 
 def test_compare_only_from_movie_lists(

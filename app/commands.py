@@ -1,8 +1,10 @@
+from pathlib import Path
 from typing import Optional
 
 import click
 from flask.cli import AppGroup
 from rich.progress import Progress
+from rich.prompt import Confirm
 
 from app import handlers
 from app.services import imdb, redis
@@ -57,6 +59,12 @@ def compare(
     from_name: Optional[str],
     to_name: Optional[str],
 ):
+    path = Path("var/sheet.xlsx")
+    if path.exists() and not Confirm.ask(
+        f"A file already exists at '{path}'. Do you want to overwrite it?"
+    ):
+        return
+
     from_movies = redis.retrieve_ratings(from_id)
     to_movies = redis.retrieve_ratings(to_id)
     both_movies, only_from, only_to = imdb.compare_ratings(from_movies, to_movies)
@@ -66,7 +74,14 @@ def compare(
 
     handler_name = getattr(handlers, f"{output_type.capitalize()}Handler")
     handler = handler_name(
-        from_name, to_name, from_movies, to_movies, both_movies, only_from, only_to
+        from_name,
+        to_name,
+        from_movies,
+        to_movies,
+        both_movies,
+        only_from,
+        only_to,
+        path,
     )
     handler.handle()
 
