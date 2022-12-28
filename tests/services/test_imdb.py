@@ -1,3 +1,5 @@
+from unittest.mock import Mock, call
+
 import pytest
 
 from app.services.imdb import Movie, compare_ratings, retrieve_ratings
@@ -52,6 +54,18 @@ def test_retrieve_ratings_from_multiple_pages(
 
     assert len(result) == 4
     assert result == all_movies
+
+
+def test_retrieve_ratings_with_pagination(ratings_request_multiple_pages):
+    on_first = Mock()
+    on_next = Mock()
+
+    retrieve_ratings("ur0000001", on_first_page=on_first, on_next_page=on_next)
+
+    assert on_first.call_count == 1
+    assert on_first.call_args == call(2)
+    assert on_next.call_count == 1
+    assert on_next.call_args == call(2)
 
 
 @pytest.mark.parametrize("limit", [1, 2, 3, 4])

@@ -7,7 +7,7 @@ from flask import Flask
 load_dotenv()
 env = os.environ.get("ENV", "production")
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 app.config.from_object("config.base")

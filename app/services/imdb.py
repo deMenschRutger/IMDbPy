@@ -1,8 +1,9 @@
 import logging
 import re
 from dataclasses import dataclass
+from math import ceil
 from operator import attrgetter
-from typing import Iterable, Optional, cast
+from typing import Callable, Iterable, Optional, cast
 
 import requests
 from bs4 import BeautifulSoup, Tag
@@ -25,11 +26,12 @@ class Movie:
         return hash(self.id)
 
 
-def _retrieve_single_ratings_page(url: str) -> tuple[list[Movie], Optional[str]]:
+def _retrieve_single_ratings_page(url: str) -> tuple[list[Movie], int, Optional[str]]:
     response = requests.get(f"https://www.imdb.com{url}")
     soup = BeautifulSoup(response.text, "html.parser")
     container = soup.find("div", id="ratings-container")
     assert isinstance(container, Tag)
+    total_pages = 1
 
     # Find all movies on the page.
     nodes = container.find_all("div", attrs={"class": "lister-item mode-detail"})
@@ -48,30 +50,50 @@ def _retrieve_single_ratings_page(url: str) -> tuple[list[Movie], Optional[str]]
             rating = int(rating.string)
         movies.append(Movie(id, title, rating))
 
-    # Find the next page, if available.
+    # Retrieve pagination information.
     footer = container.find("div", attrs={"class": "footer filmosearch"})
     if not footer:
-        return movies, None
+        return movies, total_pages, None
 
+    # Determine the number of pages.
+    pagination_range_el = container.find("span", attrs={"class": "pagination-range"})
+    if pagination_range_el:
+        movie_count = pagination_range_el.text.strip().split()[-1]
+        # IMDb returns the movie count using . as a separator, but sometimes a , can be
+        # retrieved as well. The reason for this is unknown.
+        total_pages = ceil(int(movie_count.replace(".", "").replace(",", "")) / 100)
+
+    # Find the next page, if available.
     next_page_el = container.find("a", attrs={"class": "next-page"})
     if not next_page_el:
-        return movies, None
+        return movies, total_pages, None
     assert isinstance(next_page_el, Tag)
 
     href = next_page_el.get("href")
     if not href or href == "#":
-        return movies, None
+        return movies, total_pages, None
 
-    return movies, cast(str, next_page_el["href"])
+    return movies, total_pages, cast(str, next_page_el["href"])
 
 
-def retrieve_ratings(user_id: str, limit: Optional[int] = None) -> set[Movie]:
+def retrieve_ratings(
+    user_id: str,
+    limit: Optional[int] = None,
+    on_first_page: Optional[Callable[[int], None]] = None,
+    on_next_page: Optional[Callable[[int], None]] = None,
+) -> set[Movie]:
     next_page_url = cast(Optional[str], f"/user/{user_id}/ratings")
     movies = []
     page_count = 1
     while next_page_url:
         logger.debug(f"Retrieving ratings from page {page_count}.")
-        page_movies, next_page_url = _retrieve_single_ratings_page(next_page_url)
+        page_movies, total_pages, next_page_url = _retrieve_single_ratings_page(
+            next_page_url
+        )
+        if page_count == 1 and on_first_page:
+            on_first_page(total_pages)
+        if page_count > 1 and on_next_page:
+            on_next_page(page_count)
         movies.extend(page_movies)
         page_count += 1
         if limit and len(movies) >= limit:

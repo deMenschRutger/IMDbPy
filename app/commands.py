@@ -2,6 +2,7 @@ from typing import Optional
 
 import click
 from flask.cli import AppGroup
+from rich.progress import Progress
 
 from app import handlers
 from app.services import imdb, redis
@@ -18,7 +19,22 @@ lists_cli = AppGroup("lists")
 @click.argument("user-id")
 def sync(user_id: str):
     redis.redis.ping()
-    movies = imdb.retrieve_ratings(user_id)
+
+    with Progress(transient=True) as progress:
+        task = progress.add_task("Retrieving ratings...", start=False)
+
+        def on_first_page(total_pages: int) -> None:
+            progress.update(task, total=total_pages)
+            progress.start_task(task)
+            progress.advance(task, advance=1)
+
+        def on_next_page(_page_number: int) -> None:
+            progress.advance(task, advance=1)
+
+        movies = imdb.retrieve_ratings(
+            user_id, on_first_page=on_first_page, on_next_page=on_next_page
+        )
+
     redis.store_ratings(user_id, movies)
     print(f"Synchronized {len(movies)} movies.")
 
