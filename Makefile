@@ -1,12 +1,12 @@
 test:
-	ENV=testing python -m pytest
+	python -m pytest
 
 report:
-	ENV=testing coverage run -m pytest
+	coverage run -m pytest
 	coverage report
 
 coverage:
-	ENV=testing coverage run -m pytest
+	coverage run -m pytest
 	coverage html
 
 check:

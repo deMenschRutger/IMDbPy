@@ -2,6 +2,7 @@
 profile = "black"
 
 [tool.pytest.ini_options]
+env = ["ENV = testing"]
 pythonpath = ["."]
 
 [tool.coverage.run]
