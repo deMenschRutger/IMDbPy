@@ -16,6 +16,8 @@ class Movie:
     id: str
     title: str
     rating: int
+    compare_rating: Optional[int] = None
+    rating_difference: Optional[int] = None
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Movie):
@@ -106,26 +108,22 @@ def retrieve_ratings(
 
 def compare_ratings(
     from_movies: set[Movie], to_movies: set[Movie]
-) -> tuple[dict[str, dict], list[Movie], list[Movie]]:
-    from_by_ratings = {m.id: m.rating for m in from_movies}
-    to_by_ratings = {m.id: m.rating for m in to_movies}
-    both: dict[str, dict] = dict()
-
+) -> tuple[dict[str, Movie], list[Movie], list[Movie]]:
+    from_by_id = {m.id: m for m in from_movies}
+    to_by_id = {m.id: m for m in to_movies}
+    both: dict[str, Movie] = dict()
     for movie in from_movies.intersection(to_movies):
-        from_rating = from_by_ratings[movie.id]
-        to_rating = to_by_ratings[movie.id]
-        difference = from_rating - to_rating
+        # We retrieve the movie from the 'from' list again to make sure we have the
+        # 'from' rating as the value of the Movie.rating attribute.
+        movie = from_by_id[movie.id]
+        movie.compare_rating = to_by_id[movie.id].rating
         # It doesn't matter who had the higher rating, we're just interested in the
         # difference between the two.
+        difference = movie.rating - movie.compare_rating
         if difference < 0:
             difference = 0 - difference
-        both[movie.id] = {
-            "id": movie.id,
-            "title": movie.title,
-            "from_rating": from_rating,
-            "to_rating": to_rating,
-            "difference": difference,
-        }
+        movie.rating_difference = difference
+        both[movie.id] = movie
 
     def sort_ratings(movies: Iterable[Movie]) -> list[Movie]:
         movies = sorted(movies, key=attrgetter("title"))

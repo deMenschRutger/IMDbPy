@@ -90,6 +90,12 @@ def test_compare_different_movie_lists(
 
     expected_both, expected_only_from, expected_only_to = comparison_result
     assert both == expected_both
+    assert both[movie_two.id].rating == 8
+    assert both[movie_two.id].compare_rating == 7
+    assert both[movie_two.id].rating_difference == 1
+    assert both[movie_four.id].rating == 3
+    assert both[movie_four.id].compare_rating == 5
+    assert both[movie_four.id].rating_difference == 2
     assert only_from == expected_only_from
     assert only_to == expected_only_to
 

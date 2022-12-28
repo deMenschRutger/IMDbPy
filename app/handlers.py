@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from operator import itemgetter
+from operator import attrgetter
 from pathlib import Path
 from typing import Union
 
 from openpyxl import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
 from rich.console import Console
 from rich.table import Table
 
@@ -75,25 +76,26 @@ class SheetHandler(Handler):
         to_sheet = wb.create_sheet(f"{self.to_name} only")
 
         both_sheet.append(["ID", "Title", self.from_name, self.to_name, "Difference"])
-        both = sorted(self.both.values(), key=itemgetter("difference"), reverse=True)
+        both = sorted(
+            self.both.values(), key=attrgetter("rating_difference"), reverse=True
+        )
         for movie in both:
-            row = [
-                movie["id"],
-                movie["title"],
-                movie["from_rating"],
-                movie["to_rating"],
-                movie["difference"],
-            ]
-            both_sheet.append(row)
+            both_sheet.append(
+                [
+                    movie.id,
+                    movie.title,
+                    movie.rating,
+                    movie.compare_rating,
+                    movie.rating_difference,
+                ]
+            )
 
-        from_sheet.append(["ID", "Title", "Rating"])
-        for movie in self.only_from:
-            row = [movie.id, movie.title, movie.rating]
-            from_sheet.append(row)
+        def add_only(movies: list[Movie], sheet: Worksheet):
+            sheet.append(["ID", "Title", "Rating"])
+            for movie in movies:
+                sheet.append([movie.id, movie.title, movie.rating])
 
-        to_sheet.append(["ID", "Title", "Rating"])
-        for movie in self.only_to:
-            row = [movie.id, movie.title, movie.rating]
-            to_sheet.append(row)
+        add_only(self.only_from, from_sheet)
+        add_only(self.only_to, to_sheet)
 
         wb.save(self.path)

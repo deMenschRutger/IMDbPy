@@ -24,7 +24,6 @@ def test_save_sheet(
     handler.handle()
 
     assert path.exists()
-
     wb = load_workbook(path)
     ws_both = tuple(wb["Both rated"].values)
     ws_only_from = tuple(wb["John only"].values)
