@@ -26,8 +26,11 @@ class Movie:
         return hash(self.id)
 
 
+# TODO Add option to specify the language.
 def _retrieve_single_ratings_page(url: str) -> tuple[list[Movie], int, Optional[str]]:
-    response = requests.get(f"https://www.imdb.com{url}")
+    response = requests.get(f"https://www.imdb.com{url}", headers={
+        "accept-language": "en-US,en"
+    })
     soup = BeautifulSoup(response.text, "html.parser")
     container = soup.find("div", id="ratings-container")
     assert isinstance(container, Tag)
