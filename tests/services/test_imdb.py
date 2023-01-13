@@ -6,17 +6,55 @@ from app.services.imdb import Movie, compare_ratings, retrieve_ratings
 
 
 def test_movies_are_equal():
-    movie_one = (Movie(id="tt000001", title="A certain title", rating=8),)
+    movie_one = (
+        Movie(
+            id="tt000001",
+            title="A certain title",
+            year=2020,
+            runtime="1 hr 30 min",
+            genre="Action",
+            rating=8,
+            date_rated="",
+        ),
+    )
     movie_two = (
-        Movie(id="tt000001", title="A title in a different language", rating=6),
+        Movie(
+            id="tt000001",
+            title="A title in a different language",
+            year=2021,
+            runtime="1 hr 40 min",
+            genre="Comedy",
+            rating=6,
+            date_rated="",
+        ),
     )
 
     assert movie_one == movie_two
 
 
 def test_movies_are_not_equal():
-    movie_one = (Movie(id="tt000001", title="A certain title", rating=8),)
-    movie_two = (Movie(id="tt000002", title="A certain title", rating=8),)
+    movie_one = (
+        Movie(
+            id="tt000001",
+            title="A certain title",
+            year=2020,
+            runtime="1 hr 30 min",
+            genre="Action",
+            rating=8,
+            date_rated="",
+        ),
+    )
+    movie_two = (
+        Movie(
+            id="tt000002",
+            title="A certain title",
+            year=2020,
+            runtime="1 hr 30 min",
+            genre="Action",
+            rating=8,
+            date_rated="",
+        ),
+    )
 
     assert not movie_one == movie_two
 
@@ -36,6 +74,14 @@ def test_retrieve_ratings_from_single_page(ratings_request_without_footer, movie
 
     assert len(result) == 1
     assert result == {movie_one}
+
+    result = result.pop()
+    assert result.title == movie_one.title
+    assert result.year == movie_one.year
+    assert result.runtime == movie_one.runtime
+    assert result.genre == movie_one.genre
+    assert result.rating == movie_one.rating
+    assert result.date_rated == movie_one.date_rated
 
 
 def test_retrieve_ratings_without_next_page(

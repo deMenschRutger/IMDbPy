@@ -33,10 +33,42 @@ def test_save_sheet(
     assert len(ws_only_from) == 2
     assert len(ws_only_to) == 2
 
-    assert ws_both[1] == (movie_four.id, movie_four.title, 3, 5, 2)
-    assert ws_both[2] == (movie_two.id, movie_two.title, 8, 7, 1)
-    assert ws_only_from[1] == (movie_one.id, movie_one.title, 8)
-    assert ws_only_to[1] == (movie_three.id, movie_three.title, 8)
+    assert ws_both[1] == (
+        movie_four.id,
+        movie_four.title,
+        movie_four.year,
+        movie_four.genre,
+        movie_four.runtime,
+        3,
+        5,
+        2,
+    )
+    assert ws_both[2] == (
+        movie_two.id,
+        movie_two.title,
+        movie_two.year,
+        movie_two.genre,
+        movie_two.runtime,
+        8,
+        7,
+        1,
+    )
+    assert ws_only_from[1] == (
+        movie_one.id,
+        movie_one.title,
+        movie_one.year,
+        movie_one.genre,
+        movie_one.runtime,
+        8,
+    )
+    assert ws_only_to[1] == (
+        movie_three.id,
+        movie_three.title,
+        movie_three.year,
+        movie_three.genre,
+        movie_three.runtime,
+        8,
+    )
 
 
 def test_save_sheet_with_string_path(tmp_path: PosixPath):

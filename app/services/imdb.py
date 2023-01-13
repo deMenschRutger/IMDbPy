@@ -1,6 +1,7 @@
 import logging
 import re
 from dataclasses import dataclass
+from datetime import datetime
 from math import ceil
 from operator import attrgetter
 from typing import Callable, Iterable, Optional, cast
@@ -15,8 +16,13 @@ logger = logging.getLogger(__name__)
 class Movie:
     id: str
     title: str
+    year: int
+    runtime: str
+    genre: str
     rating: int
+    date_rated: str
     compare_rating: Optional[int] = None
+    compare_date_rated: Optional[datetime] = None
     rating_difference: Optional[int] = None
 
     def __eq__(self, other) -> bool:
@@ -45,15 +51,45 @@ def _retrieve_single_ratings_page(url: str) -> tuple[list[Movie], int, Optional[
         id = node.find("div", attrs={"class": "lister-item-image ribbonize"}).attrs[
             "data-tconst"
         ]
+
         title = node.find("div", attrs={"class": "lister-item-content"}).h3.a
         if title:
             title = re.sub(r"\s+", " ", title.string)
+
+        year = node.find("span", attrs={"class": "lister-item-year"})
+        if year:
+            years = re.search(r"[0-9]{4}", year.string)
+            if years:
+                year = int(years.group(0))
+
+        runtime = node.find("span", attrs={"class": "runtime"})
+        if runtime:
+            runtime = runtime.string
+
+        genre = node.find("span", attrs={"class": "genre"})
+        if genre:
+            genre = genre.string.strip()
+
         rating = node.find("div", attrs={"class": "ipl-rating-star--other-user"}).find(
             "span", attrs={"class": "ipl-rating-star__rating"}
         )
         if rating:
             rating = int(rating.string)
-        movies.append(Movie(id, title, rating))
+
+        def find_date_rated_tag(tag: Tag) -> bool:
+            if not tag.name == "p":
+                return False
+            if not tag.has_attr("class") or "text-muted" not in tag.attrs["class"]:
+                return False
+            if not tag.string:
+                return False
+            return tag.string.startswith("Rated on")
+
+        date_rated = node.find(find_date_rated_tag)
+        if date_rated:
+            date_rated = date_rated.string.strip()[-11:]
+
+        movies.append(Movie(id, title, year, runtime, genre, rating, date_rated))
 
     # Retrieve pagination information.
     footer = container.find("div", attrs={"class": "footer filmosearch"})

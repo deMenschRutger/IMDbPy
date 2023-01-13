@@ -10,7 +10,11 @@ from app.services.imdb import Movie
 class MovieSchema(Schema):
     id = fields.Str()
     title = fields.Str()
+    year = fields.Int()
+    runtime = fields.Str()
+    genre = fields.Str()
     rating = fields.Int()
+    date_rated = fields.Str()
 
     @post_load
     def make_movie(self, data, **_kwargs):
