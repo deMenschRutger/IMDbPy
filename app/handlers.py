@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 from operator import attrgetter
 from pathlib import Path
-from typing import Union
+from typing import Any, Union
 
 from openpyxl import Workbook
-from openpyxl.worksheet.worksheet import Worksheet
+from openpyxl.styles import Font
+from openpyxl.utils import get_column_letter
 from rich.console import Console
 from rich.table import Table
 
@@ -75,27 +76,46 @@ class SheetHandler(Handler):
         from_sheet = wb.create_sheet(f"{self.from_name} only")
         to_sheet = wb.create_sheet(f"{self.to_name} only")
 
-        both_sheet.append(["ID", "Title", self.from_name, self.to_name, "Difference"])
-        both = sorted(
+        columns = (
+            ("ID", 15),
+            ("Title", 50),
+            (self.from_name, 15),
+            (self.to_name, 15),
+            ("Difference", 15),
+        )
+        movies = sorted(
             self.both.values(), key=attrgetter("rating_difference"), reverse=True
         )
-        for movie in both:
-            both_sheet.append(
-                [
-                    movie.id,
-                    movie.title,
-                    movie.rating,
-                    movie.compare_rating,
-                    movie.rating_difference,
-                ]
-            )
+        attributes = ("id", "title", "rating", "compare_rating", "rating_difference")
+        self._add_movies_to_sheet(both_sheet, columns, movies, attributes)
 
-        def add_only(movies: list[Movie], sheet: Worksheet):
-            sheet.append(["ID", "Title", "Rating"])
-            for movie in movies:
-                sheet.append([movie.id, movie.title, movie.rating])
-
-        add_only(self.only_from, from_sheet)
-        add_only(self.only_to, to_sheet)
+        columns = [
+            ("ID", 15),
+            ("Title", 50),
+            ("Rating", 12),
+        ]
+        attributes = ("id", "title", "rating")
+        self._add_movies_to_sheet(from_sheet, columns, self.only_from, attributes)
+        self._add_movies_to_sheet(to_sheet, columns, self.only_to, attributes)
 
         wb.save(self.path)
+
+    @staticmethod
+    def _add_movies_to_sheet(
+        sheet: Any,
+        columns: tuple[tuple[str, int]],
+        movies: list[Movie],
+        attributes: list[str],
+    ) -> None:
+        for i, column in enumerate(columns):
+            letter = get_column_letter(i + 1)
+            cell = sheet[f"{letter}1"]
+            cell.value = column[0]
+            cell.font = Font(bold=True)
+            sheet.column_dimensions[letter].width = column[1]
+
+        for movie in movies:
+            values = [getattr(movie, a) for a in attributes]
+            sheet.append(values)
+
+        sheet.freeze_panes = sheet["A2"]
