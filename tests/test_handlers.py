@@ -1,10 +1,19 @@
 from pathlib import PosixPath
+from unittest.mock import MagicMock, patch
 
 from openpyxl import load_workbook
 
-from app.handlers import SheetHandler
+from app.handlers import CliHandler, SheetHandler
 
 FILENAME = "test.xlsx"
+
+
+@patch("app.handlers.Console")
+def test_cli_handler(console: MagicMock):
+    handler = CliHandler("John", "Peter", set(), set(), {}, [], [])
+    handler.handle()
+
+    console.return_value.print.assert_called_once()
 
 
 def test_save_sheet(
