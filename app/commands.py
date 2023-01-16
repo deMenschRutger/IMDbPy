@@ -38,7 +38,7 @@ def sync(user_id: str):
         )
 
     redis.store_ratings(user_id, movies)
-    print(f"Synchronized {len(movies)} movies.")
+    click.echo(f"Synchronized {len(movies)} movies.")
 
 
 @lists_cli.command("compare")
@@ -52,17 +52,20 @@ def sync(user_id: str):
 )
 @click.option("--from-name")
 @click.option("--to-name")
+@click.option("-p", "--path", default="var/sheet.xlsx")
 def compare(
     from_id: str,
     to_id: str,
     output_type: str,
     from_name: Optional[str],
     to_name: Optional[str],
+    path: Path,
 ):
-    path = Path("var/sheet.xlsx")
+    path = Path(path)
     if path.exists() and not Confirm.ask(
         f"A file already exists at '{path}'. Do you want to overwrite it?"
     ):
+        click.echo("Aborted!")
         return
 
     from_movies = redis.retrieve_ratings(from_id)
@@ -84,6 +87,8 @@ def compare(
         path,
     )
     handler.handle()
+
+    click.echo(f"The sheet was successfully created at {path}.")
 
 
 app.cli.add_command(lists_cli)
