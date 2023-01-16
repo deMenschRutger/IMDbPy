@@ -14,12 +14,21 @@ from . import app
 OUTPUT_TYPE_CLI = "cli"
 OUTPUT_TYPE_SHEET = "sheet"
 
-lists_cli = AppGroup("lists")
+lists_cli = AppGroup("lists", help="Synchronize and compare rating lists.")
 
 
 @lists_cli.command("sync")
 @click.argument("user-id")
 def sync(user_id: str):
+    """
+    The sync command retrieves all ratings for a specific IMDb user by scraping the
+    IMDb website, then stores the ratings in a Redis database. Scraping IMDb takes a
+    long time, so we don't want to have to visit it every time we use a command that
+    needs user ratings. Subsequent commands, such as the compare command, do not work
+    unless the ratings for the provided users have been synchronized first.
+
+    USER_ID The ID of the user on IMDb, including the 'ur' prefix
+    """
     redis.redis.ping()
 
     with Progress(transient=True) as progress:
@@ -49,10 +58,21 @@ def sync(user_id: str):
     "--output-type",
     type=click.Choice([OUTPUT_TYPE_CLI, OUTPUT_TYPE_SHEET], case_sensitive=False),
     default=OUTPUT_TYPE_CLI,
+    help="How to output the results of the comparison.",
 )
-@click.option("--from-name")
-@click.option("--to-name")
-@click.option("-p", "--path", default="var/sheet.xlsx")
+@click.option(
+    "--from-name", help="The name of the first user. Defaults to the user's IMDb ID."
+)
+@click.option(
+    "--to-name", help="The name of the second user. Defaults to the user's IMDb ID."
+)
+@click.option(
+    "-p",
+    "--path",
+    default="var/sheet.xlsx",
+    help="Path to write the sheet to if the output type is 'sheet'. Defaults to "
+    "'var/sheet.xlsx'.",
+)
 def compare(
     from_id: str,
     to_id: str,
@@ -61,6 +81,19 @@ def compare(
     to_name: Optional[str],
     path: Path,
 ):
+    """
+    This command takes the ratings of two IMDb users and compares them. The results can
+    be shown in the terminal or written to a sheet. On the terminal only some basic
+    statistics will be shown. However, the sheet will include three separate tabs,
+    two for movies that only one of the users has rated and one for the movies both
+    users have rated. The latter also includes information about the difference in
+    rating between the two users per movie.
+
+    \b
+    FROM_ID The IMDb ID of the first user to compare
+    TO_ID The IMDb ID of the second user to compare
+    \f
+    """
     path = Path(path)
     if path.exists() and not Confirm.ask(
         f"A file already exists at '{path}'. Do you want to overwrite it?"
