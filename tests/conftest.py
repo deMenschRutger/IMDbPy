@@ -20,6 +20,12 @@ def pytest_sessionstart():
         )
 
 
+@pytest.fixture()
+def configure_redis():
+    yield
+    redis.flushdb()
+
+
 @pytest.fixture(scope="session")
 def movie_one():
     return Movie(

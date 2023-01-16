@@ -7,9 +7,8 @@ REDIS_KEY = f"user:{USER_ID}:ratings"
 
 
 @pytest.fixture(autouse=True)
-def configure_redis():
+def auto_use_redis(configure_redis):
     yield
-    redis.flushdb()
 
 
 def test_store_ratings(all_movies):
