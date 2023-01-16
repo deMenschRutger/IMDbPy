@@ -105,11 +105,15 @@ def comparison_result(
 ):
     movie_two = deepcopy(movie_two)
     movie_two.rating = 8
+    movie_two.date_rated = date(2022, 6, 2)
     movie_two.compare_rating = 7
+    movie_two.compare_date_rated = date(2022, 6, 5)
     movie_two.rating_difference = 1
     movie_four = deepcopy(movie_four)
     movie_four.rating = 3
+    movie_four.date_rated = date(2021, 4, 4)
     movie_four.compare_rating = 5
+    movie_four.compare_date_rated = date(2021, 4, 11)
     movie_four.rating_difference = 2
 
     both = {

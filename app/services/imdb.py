@@ -155,6 +155,7 @@ def compare_ratings(
         # 'from' rating as the value of the Movie.rating attribute.
         movie = from_by_id[movie.id]
         movie.compare_rating = to_by_id[movie.id].rating
+        movie.compare_date_rated = to_by_id[movie.id].date_rated
         # It doesn't matter who had the higher rating, we're just interested in the
         # difference between the two.
         difference = movie.rating - movie.compare_rating
@@ -164,8 +165,7 @@ def compare_ratings(
         both[movie.id] = movie
 
     def sort_ratings(movies: Iterable[Movie]) -> list[Movie]:
-        movies = sorted(movies, key=attrgetter("title"))
-        return sorted(movies, key=attrgetter("rating"), reverse=True)
+        return sorted(movies, key=attrgetter("rating", "date_rated"), reverse=True)
 
     only_from = sort_ratings(from_movies.difference(to_movies))
     only_to = sort_ratings(to_movies.difference(from_movies))

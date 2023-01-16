@@ -83,11 +83,15 @@ class SheetHandler(Handler):
             ("Genre", 30),
             ("Runtime", 15),
             (self.from_name, 15),
+            ("Date rated", 18),
             (self.to_name, 15),
+            ("Date rated", 18),
             ("Difference", 15),
         )
         movies = sorted(
-            self.both.values(), key=attrgetter("rating_difference"), reverse=True
+            self.both.values(),
+            key=attrgetter("rating_difference", "date_rated"),
+            reverse=True,
         )
         attributes = (
             "id",
@@ -96,7 +100,9 @@ class SheetHandler(Handler):
             "genre",
             "runtime",
             "rating",
+            "date_rated",
             "compare_rating",
+            "compare_date_rated",
             "rating_difference",
         )
         self._add_movies_to_sheet(both_sheet, columns, movies, attributes)
@@ -108,8 +114,9 @@ class SheetHandler(Handler):
             ("Genre", 30),
             ("Runtime", 15),
             ("Rating", 12),
+            ("Date rated", 18),
         ]
-        attributes = ("id", "title", "year", "genre", "runtime", "rating")
+        attributes = ("id", "title", "year", "genre", "runtime", "rating", "date_rated")
         self._add_movies_to_sheet(from_sheet, columns, self.only_from, attributes)
         self._add_movies_to_sheet(to_sheet, columns, self.only_to, attributes)
 

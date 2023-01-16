@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import PosixPath
 from unittest.mock import MagicMock, patch
 
@@ -49,7 +50,14 @@ def test_save_sheet(
         movie_four.genre,
         movie_four.runtime,
         3,
+        # openpyxl internally converts instances of date back to instances of datetime.
+        datetime(
+            movie_four.date_rated.year,
+            movie_four.date_rated.month,
+            movie_four.date_rated.day,
+        ),
         5,
+        datetime(2021, 4, 11),
         2,
     )
     assert ws_both[2] == (
@@ -59,7 +67,9 @@ def test_save_sheet(
         movie_two.genre,
         movie_two.runtime,
         8,
+        datetime(2022, 6, 2),
         7,
+        datetime(2022, 6, 5),
         1,
     )
     assert ws_only_from[1] == (
@@ -69,6 +79,11 @@ def test_save_sheet(
         movie_one.genre,
         movie_one.runtime,
         8,
+        datetime(
+            movie_one.date_rated.year,
+            movie_one.date_rated.month,
+            movie_one.date_rated.day,
+        ),
     )
     assert ws_only_to[1] == (
         movie_three.id,
@@ -77,6 +92,11 @@ def test_save_sheet(
         movie_three.genre,
         movie_three.runtime,
         8,
+        datetime(
+            movie_three.date_rated.year,
+            movie_three.date_rated.month,
+            movie_three.date_rated.day,
+        ),
     )
 
 
