@@ -1,4 +1,5 @@
 from copy import deepcopy
+from datetime import date
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -35,7 +36,7 @@ def movie_one():
         runtime="2 hr 19 min",
         genre="Action, Adventure, Comedy",
         rating=8,
-        date_rated="17 Jun 2022",
+        date_rated=date.fromisoformat("2022-06-17"),
     )
 
 
@@ -48,7 +49,7 @@ def movie_two():
         runtime="2 hr 13 min",
         genre="Drama, Romance, War",
         rating=7,
-        date_rated="02 Jun 2022",
+        date_rated=date.fromisoformat("2022-06-02"),
     )
 
 
@@ -61,7 +62,7 @@ def movie_three():
         runtime="1 hr 32 min",
         genre="Drama, Mystery",
         rating=8,
-        date_rated="May 16 2022",
+        date_rated=date.fromisoformat("2022-05-16"),
     )
 
 
@@ -74,7 +75,7 @@ def movie_four():
         runtime="1 hr 58 min",
         genre="Action, Adventure, Sci-Fi",
         rating=2,
-        date_rated="04 Apr 2021",
+        date_rated=date.fromisoformat("2021-04-04"),
     )
 
 

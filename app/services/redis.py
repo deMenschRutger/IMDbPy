@@ -14,7 +14,7 @@ class MovieSchema(Schema):
     runtime = fields.Str()
     genre = fields.Str()
     rating = fields.Int()
-    date_rated = fields.Str()
+    date_rated = fields.Date()
 
     @post_load
     def make_movie(self, data, **_kwargs):

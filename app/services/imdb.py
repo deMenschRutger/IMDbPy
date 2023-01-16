@@ -1,7 +1,7 @@
 import logging
 import re
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from math import ceil
 from operator import attrgetter
 from typing import Callable, Iterable, Optional, cast
@@ -20,9 +20,9 @@ class Movie:
     runtime: str
     genre: str
     rating: int
-    date_rated: str
+    date_rated: date
     compare_rating: Optional[int] = None
-    compare_date_rated: Optional[datetime] = None
+    compare_date_rated: Optional[date] = None
     rating_difference: Optional[int] = None
 
     def __eq__(self, other) -> bool:
@@ -87,7 +87,9 @@ def _retrieve_single_ratings_page(url: str) -> tuple[list[Movie], int, Optional[
 
         date_rated = node.find(find_date_rated_tag)
         if date_rated:
-            date_rated = date_rated.string.strip()[-11:]
+            date_rated = datetime.strptime(
+                date_rated.string.strip(), "Rated on %d %b %Y"
+            ).date()
 
         movies.append(Movie(id, title, year, runtime, genre, rating, date_rated))
 

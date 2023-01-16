@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest.mock import Mock, call
 
 import pytest
@@ -14,7 +15,7 @@ def test_movies_are_equal():
             runtime="1 hr 30 min",
             genre="Action",
             rating=8,
-            date_rated="",
+            date_rated=datetime.fromisoformat("2022-06-20"),
         ),
     )
     movie_two = (
@@ -25,7 +26,7 @@ def test_movies_are_equal():
             runtime="1 hr 40 min",
             genre="Comedy",
             rating=6,
-            date_rated="",
+            date_rated=datetime.fromisoformat("2022-06-20"),
         ),
     )
 
@@ -41,7 +42,7 @@ def test_movies_are_not_equal():
             runtime="1 hr 30 min",
             genre="Action",
             rating=8,
-            date_rated="",
+            date_rated=datetime.fromisoformat("2022-06-20"),
         ),
     )
     movie_two = (
@@ -52,7 +53,7 @@ def test_movies_are_not_equal():
             runtime="1 hr 30 min",
             genre="Action",
             rating=8,
-            date_rated="",
+            date_rated=datetime.fromisoformat("2022-06-20"),
         ),
     )
 
