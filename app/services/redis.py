@@ -14,7 +14,7 @@ class MovieSchema(Schema):
     runtime = fields.Str()
     genre = fields.Str()
     rating = fields.Int()
-    date_rated = fields.Date()
+    date_rated = fields.Date(data_key="dateRated")
 
     @post_load
     def make_movie(self, data, **_kwargs):
@@ -37,6 +37,9 @@ def store_ratings(user_id: str, movies: set[Movie]) -> None:
 
 
 def retrieve_ratings(user_id: str) -> set[Movie]:
-    movies = redis.smembers(f"user:{user_id}:ratings")
+    key = f"user:{user_id}:ratings"
+    if not redis.exists(key):
+        raise KeyError("No ratings exist for that user.")
+    movies = redis.smembers(key)
     movies = {MovieSchema().loads(cast(str, m)) for m in movies}
     return cast(set[Movie], movies)

@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 
 from app import app
-from app.services.redis import redis
+from app.services.redis import redis, store_ratings
 
 USER_ID_ONE = "ur0000001"
 USER_ID_TWO = "ur0000002"
@@ -28,14 +28,19 @@ def existing_file(test_sheet_path: PosixPath):
     return test_sheet_path
 
 
-def test_sync_command(configure_redis, ratings_request_multiple_pages, runner):
+def test_sync_command(ratings_request_multiple_pages, runner):
     result = runner.invoke(args=["lists", "sync", USER_ID_ONE])
 
     assert result.output.strip() == "Synchronized 4 movies."
     assert redis.scard(REDIS_KEY_ONE) == 4
 
 
-def test_compare_command_file_does_not_exist(runner, test_sheet_path: PosixPath):
+def test_compare_command_file_does_not_exist(
+    all_movies, runner, test_sheet_path: PosixPath
+):
+    store_ratings(USER_ID_ONE, all_movies)
+    store_ratings(USER_ID_TWO, all_movies)
+
     result = runner.invoke(
         args=[
             "lists",
@@ -77,7 +82,12 @@ def test_compare_command_file_exists(confirm, runner, existing_file: PosixPath):
 
 
 @patch("app.commands.Confirm")
-def test_compare_command_overwrite(confirm, runner, existing_file: PosixPath):
+def test_compare_command_overwrite(
+    confirm, all_movies, runner, existing_file: PosixPath
+):
+    store_ratings(USER_ID_ONE, all_movies)
+    store_ratings(USER_ID_TWO, all_movies)
+
     confirm.ask.return_value = True
 
     result = runner.invoke(

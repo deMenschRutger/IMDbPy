@@ -21,7 +21,7 @@ def pytest_sessionstart():
         )
 
 
-@pytest.fixture()
+@pytest.fixture(autouse=True)
 def configure_redis():
     yield
     redis.flushdb()
