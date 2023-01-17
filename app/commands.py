@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import click
 from flask.cli import AppGroup
@@ -95,8 +95,12 @@ def compare(
     \f
     """
     path = Path(path)
-    if path.exists() and not Confirm.ask(
-        f"A file already exists at '{path}'. Do you want to overwrite it?"
+    if (
+        output_type == OUTPUT_TYPE_SHEET
+        and path.exists()
+        and not Confirm.ask(
+            f"A file already exists at '{path}'. Do you want to overwrite it?"
+        )
     ):
         click.echo("Aborted!")
         return
@@ -108,8 +112,7 @@ def compare(
     from_name = from_name or from_id
     to_name = to_name or to_id
 
-    handler_name = getattr(handlers, f"{output_type.capitalize()}Handler")
-    handler = handler_name(
+    arguments: list[Any] = [
         from_name,
         to_name,
         from_movies,
@@ -117,11 +120,16 @@ def compare(
         both_movies,
         only_from,
         only_to,
-        path,
-    )
+    ]
+    if output_type == OUTPUT_TYPE_SHEET:
+        arguments.append(path)
+
+    handler_name = getattr(handlers, f"{output_type.capitalize()}Handler")
+    handler = handler_name(*arguments)
     handler.handle()
 
-    click.echo(f"The sheet was successfully created at {path}.")
+    if output_type == OUTPUT_TYPE_SHEET:
+        click.echo(f"The sheet was successfully created at {path}.")
 
 
 app.cli.add_command(lists_cli)
